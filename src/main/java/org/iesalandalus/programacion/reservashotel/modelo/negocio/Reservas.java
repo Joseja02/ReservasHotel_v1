@@ -12,29 +12,30 @@ import java.time.LocalDateTime;
 public class Reservas {
     private final int capacidad;
     private int tamano;
-    private Reserva[] reservas;
+    private Reserva[] coleccionReservas;
 
     public Reservas(int capacidad) {
         if (capacidad <= 0) {
             throw new IllegalArgumentException("ERROR: La capacidad debe ser mayor que cero.");
         }
         this.capacidad = capacidad;
-        reservas = new Reserva[this.capacidad];
-        tamano = getTamano();
+        coleccionReservas = new Reserva[this.capacidad];
+        tamano = 0;
     }
 
     public Reserva[] get() {
         return copiaProfundaReservaes();
     }
-
     private Reserva[] copiaProfundaReservaes() {
 
-        Reserva[] copiaReservaes = new Reserva[getCapacidad()];
+        Reserva[] copiaReservas = new Reserva[getCapacidad()];
 
-        for (int i = 0; i < reservas.length; i++) {
-            copiaReservaes[i] = new Reserva(reservas[i]);
+        for (int i = 0; i < coleccionReservas.length; i++) {
+            if (coleccionReservas[i] != null) {
+                copiaReservas[i] = new Reserva(coleccionReservas[i]);
+            }
         }
-        return copiaReservaes;
+        return copiaReservas;
     }
 
     public int getCapacidad() {
@@ -43,8 +44,8 @@ public class Reservas {
 
     public int getTamano() {
         int counter = 0;
-        for (int i = 0; i < reservas.length; i++)
-            if (reservas[i] != null)
+        for (int i = 0; i < coleccionReservas.length; i++)
+            if (coleccionReservas[i] != null)
                 counter++;
         return counter;
     }
@@ -57,7 +58,7 @@ public class Reservas {
 
         tamano = getTamano();
 
-        if (buscar(reserva) != null) {
+        if(buscar(reserva)!=null){
             throw new OperationNotSupportedException("ERROR: Ya existe una reserva igual.");
         }
         if (capacidadSuperada(getTamano() + 1)) {
@@ -66,15 +67,15 @@ public class Reservas {
 
         Reserva[] nuevoArray = new Reserva[tamano + 1];
 
-        if (capacidad >= 0) {
-            for (int i = 0; i < getTamano(); i++) {
-                nuevoArray[i] = new Reserva(get()[i]);
+        if (capacidad >= 0){
+            for(int i=0; i < getTamano(); i++){
+                nuevoArray[i]= new Reserva(get()[i]);
             }
         }
         nuevoArray[nuevoArray.length - 1] = new Reserva(reserva);
 
-        this.reservas = new Reserva[nuevoArray.length];
-        System.arraycopy(nuevoArray, 0, reservas, 0, nuevoArray.length);
+        this.coleccionReservas = new Reserva[nuevoArray.length];
+        System.arraycopy(nuevoArray, 0, coleccionReservas, 0, nuevoArray.length);
         tamano = getTamano();
     }
 
@@ -83,7 +84,8 @@ public class Reservas {
             Reserva res = new Reserva(get()[i]);
             if (res.getHuesped().getDni().equals(reserva.getHuesped().getDni()) &&
                     res.getHabitacion().equals(reserva.getHabitacion()) &&
-                    res.getFechaInicioReserva().equals(reserva.getFechaInicioReserva())) {
+                    res.getFechaInicioReserva().equals(reserva.getFechaInicioReserva()))
+            {
                 return i;
             }
         }
@@ -128,24 +130,24 @@ public class Reservas {
 
     private void desplazarUnaPosicionHaciaLaIzquierda(int indice) {
         Reserva[] nuevoArray = new Reserva[tamano - 1];
-        System.arraycopy(reservas, 0, nuevoArray, 0, indice);
+        System.arraycopy(coleccionReservas, 0, nuevoArray, 0, indice);
         if (!tamanoSuperado(indice)) {
-            System.arraycopy(reservas, indice + 1, nuevoArray, indice, reservas.length - indice - 1);
+            System.arraycopy(coleccionReservas, indice + 1, nuevoArray, indice, coleccionReservas.length - indice - 1);
         }
-        reservas = nuevoArray;
+        coleccionReservas = nuevoArray;
         tamano = getTamano();
     }
 
-    public Reserva[] getReservas(Huesped huesped) {
-        if (huesped == null) {
+    public Reserva[] getReservas(Huesped huesped)  {
+        if(huesped == null)
+        {
             throw new NullPointerException("ERROR: No se pueden buscar reservas de un huesped nulo.");
         }
-
-        Reserva[] reservasHuesped = new Reserva[capacidad];
+        Reserva[] reservasHuesped= new Reserva[capacidad];
         int posReservasHuesped = 0;
-        for (int i = 0; i < get().length; i++) {
+        for(int i=0; i< get().length; i++){
             Reserva reserva = get()[i];
-            if (reserva.getHuesped().getDni().equals(huesped.getDni())) {
+            if(reserva != null && reserva.getHuesped().getDni().equals(huesped.getDni())){
                 reservasHuesped[posReservasHuesped] = new Reserva(reserva);
                 posReservasHuesped++;
             }
@@ -154,14 +156,14 @@ public class Reservas {
     }
 
     public Reserva[] getReservas(TipoHabitacion tipoHabitacion) {
-        if (tipoHabitacion == null) {
+        if(tipoHabitacion==null){
             throw new NullPointerException("ERROR: No se pueden buscar reservas de un tipo de habitación nula.");
         }
-        Reserva[] reservasHuesped = new Reserva[capacidad];
+        Reserva[] reservasHuesped= new Reserva[capacidad];
         int posReservasTipo = 0;
-        for (int i = 0; i < reservas.length; i++) {
+        for(int i = 0; i< coleccionReservas.length; i++){
             Reserva reserva = get()[i];
-            if (reserva.getHabitacion().getTipoHabitacion().equals(tipoHabitacion)) {
+            if(reserva != null && reserva.getHabitacion().getTipoHabitacion().equals(tipoHabitacion)){
                 reservasHuesped[posReservasTipo] = new Reserva(reserva);
                 posReservasTipo++;
             }
@@ -169,16 +171,17 @@ public class Reservas {
         return reservasHuesped;
     }
 
-    public Reserva[] getReservasFuturas(Habitacion habitacion) {
-        if (habitacion == null)
+    public Reserva[] getReservasFuturas(Habitacion habitacion){
+        if(habitacion==null)
             throw new NullPointerException("ERROR: No se pueden buscar reservas de una habitación nula.");
 
-        Reserva[] reservasHuesped = new Reserva[capacidad];
+        Reserva[] reservasHuesped= new Reserva[capacidad];
         int posReservasHabitacion = 0;
-        for (int i = 0; i < reservas.length; i++) {
+        for(int i = 0; i< coleccionReservas.length; i++){
             Reserva reserva = get()[i];
-            if (reserva.getHabitacion().getIdentificador().equals(habitacion.getIdentificador()) &&
-                    reserva.getFechaInicioReserva().isAfter(LocalDate.now())) {
+            if(reserva != null && reserva.getHabitacion().getIdentificador().equals(habitacion.getIdentificador()) &&
+                    reserva.getFechaInicioReserva().isAfter(LocalDate.now()))
+            {
                 reservasHuesped[posReservasHabitacion] = new Reserva(reserva);
                 posReservasHabitacion++;
             }
@@ -187,10 +190,26 @@ public class Reservas {
     }
 
     public void realizarCheckin(Reserva reserva, LocalDateTime fecha) {
+
+        if (reserva == null){
+            throw new NullPointerException("ERROR: La reserva de un Checkin no puede ser nula.");
+        }
+        if (fecha == null){
+            throw new NullPointerException("ERROR: La fecha de un Checkin no puede ser nula.");
+        }
         reserva.setCheckIn(fecha);
     }
 
     public void realizarCheckout(Reserva reserva, LocalDateTime fecha) {
+        if (reserva == null){
+            throw new NullPointerException("ERROR: La reserva de un Checkout no puede ser nula.");
+        }
+        if (fecha == null){
+            throw new NullPointerException("ERROR: La fecha de un Checkout no puede ser nula.");
+        }
+        if (reserva.getCheckIn() == null){
+            throw new IllegalArgumentException("ERROR: No se puede realizar el Checkout sin haber hecho antes el Checkin.");
+        }
         reserva.setCheckOut(fecha);
     }
 }

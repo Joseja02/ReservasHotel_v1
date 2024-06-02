@@ -1,33 +1,23 @@
 package org.iesalandalus.programacion.reservashotel.vista;
 
 import org.iesalandalus.programacion.reservashotel.controlador.Controlador;
-import org.iesalandalus.programacion.reservashotel.modelo.Modelo;
 import org.iesalandalus.programacion.reservashotel.modelo.dominio.Habitacion;
 import org.iesalandalus.programacion.reservashotel.modelo.dominio.Huesped;
 import org.iesalandalus.programacion.reservashotel.modelo.dominio.Reserva;
 import org.iesalandalus.programacion.reservashotel.modelo.dominio.TipoHabitacion;
-import org.iesalandalus.programacion.reservashotel.modelo.negocio.Habitaciones;
-import org.iesalandalus.programacion.reservashotel.modelo.negocio.Huespedes;
-import org.iesalandalus.programacion.reservashotel.modelo.negocio.Reservas;
 import org.iesalandalus.programacion.utilidades.Entrada;
 
 import javax.naming.OperationNotSupportedException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Comparator;
 
 import static org.iesalandalus.programacion.reservashotel.modelo.dominio.Reserva.FORMATO_FECHA_RESERVA;
 
 public class Vista {
-
-    public static int CAPACIDAD = 4;
-    private static Reservas reservas = new Reservas(CAPACIDAD);
-    private static Huespedes huespedes = new Huespedes(CAPACIDAD);
-    private static Habitaciones habitaciones = new Habitaciones(CAPACIDAD);
     private static Controlador controlador;
-    private static Opcion opcion;
 
     public void setControlador(Controlador controlador) {
         if (controlador == null) {
@@ -37,6 +27,7 @@ public class Vista {
     }
 
     public void comenzar() {
+        Opcion opcion;
         do {
             Consola.mostrarMenu();
             opcion = Consola.elegirOpcion();
@@ -44,14 +35,13 @@ public class Vista {
         }
         while (opcion != Opcion.SALIR);
     }
-
     public void terminar() {
         System.out.print("¡Hasta luego! - Tarea Online 5 | Jose Javier Sierra Berdún");
     }
 
     private static void ejecutarOpcion(Opcion opcion) {
         switch (opcion) {
-            case SALIR -> System.out.print("¡Hasta luego! - Tarea Online 5 | Jose Javier Sierra Berdún");
+            case SALIR -> System.out.print("¡Hasta luego! - Tarea Online 4 | Jose Javier Sierra Berdún");
             case INSERTAR_HUESPED -> insertarHuesped();
             case BUSCAR_HUESPED -> buscarHuesped();
             case BORRAR_HUESPED -> borrarHuesped();
@@ -78,137 +68,148 @@ public class Vista {
     private static void insertarHuesped() {
         try {
             Huesped huesped = Consola.leerHuesped();
-            huespedes.insertar(huesped);
-            System.out.print("Huesped ha sido insertado");
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+            controlador.insertar(huesped);
+            System.out.print("El huesped ha sido insertado.");
+        } catch (IllegalArgumentException | NullPointerException | OperationNotSupportedException | DateTimeParseException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void buscarHuesped() {
         try {
             Huesped huesped = Consola.leerHuespedPorDni();
-            huesped = huespedes.buscar(huesped);
+            huesped = controlador.buscar(huesped);
             if (huesped != null) {
-                System.out.println(huesped.toString());
+                System.out.println(huesped);
             } else {
                 System.out.print("El huesped no existe");
             }
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+        } catch (IllegalArgumentException | NullPointerException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void borrarHuesped() {
         try {
             Huesped huesped = Consola.leerHuespedPorDni();
-            huespedes.borrar(huesped);
+            huesped = controlador.buscar(huesped);
+            controlador.borrar(huesped);
             System.out.print("Huesped ha sido borrado");
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+        } catch (IllegalArgumentException | NullPointerException | OperationNotSupportedException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void mostrarHuespedes() {
         try {
-            if (huespedes.getTamano() > 0) {
-                System.out.println("Estos son los Huespedes existentes: ");
+            if (controlador.getHuespedes().length > 0) {
+                System.out.println("Estos son los huespedes existentes: ");
                 System.out.println(" ");
-                for (int i = 0; i < huespedes.getTamano(); i++) {
-                    System.out.println(huespedes.get()[i].toString());
+                for (int i = 0; i < controlador.getHuespedes().length; i++) {
+                    System.out.println(controlador.getHuespedes()[i].toString());
                     System.out.println(" ");
                 }
-
             } else {
-                System.out.println("No existen hu?spedes ");
+                System.out.println("No existen huéspedes ");
             }
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+        } catch (IllegalArgumentException | NullPointerException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void insertarHabitacion() {
         try {
             Habitacion habitacion = Consola.leerHabitacion();
-            habitaciones.insertar(habitacion);
+            controlador.insertar(habitacion);
             System.out.print("La Habitacion ha sido insertada");
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+        } catch (IllegalArgumentException | NullPointerException | OperationNotSupportedException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void buscarHabitacion() {
         try {
-            Habitacion habitacion = Consola.leerHabitacion();
-            habitacion = habitaciones.buscar(habitacion);
+            Habitacion habitacion = Consola.leerHabitacionPorIdentificador();
+            habitacion = controlador.buscar(habitacion);
             if (habitacion != null) {
-                System.out.println(habitacion.toString());
+                System.out.println(habitacion);
             } else {
-                System.out.print("La Habitaci?n no existe");
+                System.out.print("La Habitación no existe");
             }
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+        } catch (IllegalArgumentException | NullPointerException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void borrarHabitacion() {
         try {
-            Habitacion habitacion = Consola.leerHabitacion();
-            habitaciones.borrar(habitacion);
-            System.out.print("La Habitaci?n ha sido borrada");
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+            Habitacion habitacion = Consola.leerHabitacionPorIdentificador();
+            habitacion = controlador.buscar(habitacion);
+            controlador.borrar(habitacion);
+            System.out.print("La Habitación ha sido borrada");
+        } catch (IllegalArgumentException | NullPointerException | OperationNotSupportedException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void mostrarHabitaciones() {
         try {
-            if (habitaciones.getTamano() > 0) {
+            if (controlador.getHabitaciones().length > 0) {
                 System.out.println("Estas son las Habitaciones existentes: ");
                 System.out.println(" ");
-                for (int i = 0; i < habitaciones.getTamano(); i++) {
-                    System.out.println(habitaciones.get()[i].toString());
+                for (int i = 0; i < controlador.getHabitaciones().length; i++) {
+                    System.out.println(controlador.getHabitaciones()[i].toString());
                     System.out.println(" ");
                 }
-
             } else {
                 System.out.println("No existen habitaciones ");
             }
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+        } catch (IllegalArgumentException | NullPointerException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void insertarReserva() {
         try {
             Reserva reserva = Consola.leerReserva();
-            Reserva reservaExistente = reservas.buscar(reserva);
-            if (reservaExistente == null) {
-                reservas.insertar(reserva);
-                System.out.print("La reserva ha sido registrada");
+
+            Huesped huespedReserva = reserva.getHuesped();
+            huespedReserva = controlador.buscar(huespedReserva);
+            reserva.setHuesped(huespedReserva);
+
+            Habitacion habitacionReserva = reserva.getHabitacion();
+            habitacionReserva = controlador.buscar(habitacionReserva);
+            reserva.setHabitacion(habitacionReserva);
+
+            TipoHabitacion tipoHabitacionReserva = reserva.getHabitacion().getTipoHabitacion();
+
+            Habitacion habitacionDisponible = consultarDisponibilidad(tipoHabitacionReserva, reserva.getFechaInicioReserva(), reserva.getFechaFinReserva());
+
+            if (habitacionDisponible != null) {
+                Reserva reservaExistente = controlador.buscar(reserva);
+
+                if (reservaExistente == null) {
+                    controlador.insertar(reserva);
+                    System.out.print("La reserva ha sido registrada");
+                } else {
+                    System.out.print("ERROR: No es posible registrar esta reserva porque ya existe otra reserva para la misma fecha y habitación seleccionada");
+                }
             } else {
-                System.out.print("No es posible registrar esta reserva porque ya existe otr reserva para la misma fecha y habitaci?n seleccionada");
+                System.out.println("ERROR: La habitación que intentas reservar no está disponible");
             }
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+
+        } catch (NullPointerException | IllegalArgumentException | OperationNotSupportedException |
+                 DateTimeParseException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void listarReservas(Huesped huesped) {
         try {
-            if (reservas.getTamano() > 0) {
+            if (controlador.getReservas(huesped).length > 0) {
                 System.out.println("Estas son las reservas para este huesped: ");
                 System.out.println(" ");
-                Reserva[] reservasHuesped = reservas.getReservas(huesped);
+                Reserva[] reservasHuesped = controlador.getReservas(huesped);
                 if (reservasHuesped.length > 0) {
                     for (int i = 0; i < reservasHuesped.length; i++) {
                         System.out.println(reservasHuesped[i].toString());
@@ -221,53 +222,50 @@ public class Vista {
             } else {
                 System.out.println("No existen reservas ");
             }
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+        } catch (NullPointerException | IllegalArgumentException | DateTimeParseException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void listarReservas(TipoHabitacion tipoHabitacion) {
         try {
-            if (reservas.getTamano() > 0) {
-                System.out.println("Estas son las reservas para este tipo de habitaci?n: ");
+            if (controlador.getReservas(tipoHabitacion).length > 0) {
+                System.out.println("Estas son las reservas para este tipo de habitación: ");
                 System.out.println(" ");
-                Reserva[] reservasTipo = reservas.getReservas(tipoHabitacion);
+                Reserva[] reservasTipo = controlador.getReservas(tipoHabitacion);
                 if (reservasTipo.length > 0) {
                     for (int i = 0; i < reservasTipo.length; i++) {
                         System.out.println(reservasTipo[i].toString());
                         System.out.println(" ");
                     }
                 } else {
-                    System.out.println("No existen reservas para este tipo de habitaci?n");
+                    System.out.println("No existen reservas para este tipo de habitación");
                 }
-
             } else {
                 System.out.println("No existen reservas ");
             }
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+        } catch (NullPointerException | IllegalArgumentException | DateTimeParseException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static Reserva[] getReservasAnulables(Reserva[] reservas) throws OperationNotSupportedException {
-        Reservas reservasAnulables = new Reservas(CAPACIDAD);
+        Reserva[] reservasAnulables = controlador.getReservas();
         for (int i = 0; i < reservas.length; i++) {
             LocalDate fechaActual = LocalDate.now();
             if (fechaActual.isBefore(reservas[i].getFechaInicioReserva())) {
-                reservasAnulables.insertar(new Reserva(reservas[i]));
+                controlador.insertar(reservasAnulables[i]);
             }
         }
-        return reservasAnulables.get();
+        return reservasAnulables;
     }
 
     private static void anularReserva() {
         try {
             Huesped huesped = Consola.leerHuespedPorDni();
-            huesped = huespedes.buscar(huesped);
+            huesped = controlador.buscar(huesped);
             if (huesped != null) {
-                Reserva[] reservasHuesped = reservas.getReservas(huesped);
+                Reserva[] reservasHuesped = controlador.getReservas(huesped);
                 if (reservasHuesped.length > 0) {
                     Reserva[] reservasAnulables = getReservasAnulables(reservasHuesped);
                     if (reservasAnulables.length <= 0) {
@@ -282,14 +280,14 @@ public class Vista {
                                 System.out.print("Escoja la reserva que desea anular: ");
                                 eleccion = Entrada.entero();
                             } while (eleccion < 0 || eleccion > reservasAnulables.length);
-                            reservas.borrar(reservasAnulables[eleccion]);
+                            controlador.borrar(reservasAnulables[eleccion]);
                         } else {
                             //Solo Existe una reserva anulable para este huesped
                             System.out.println(reservasAnulables[0].toString());
-                            System.out.println("Est? seguro de que desea anular esta reserva (S/N): ");
+                            System.out.println("Está seguro de que desea anular esta reserva (S/N): ");
                             char respuesta = Entrada.caracter();
                             if (Character.toString(respuesta).equalsIgnoreCase("s"))
-                                reservas.borrar(reservasAnulables[0]);
+                                controlador.borrar(reservasAnulables[0]);
                         }
                     }
                 } else {
@@ -300,28 +298,27 @@ public class Vista {
                 System.out.print("El huesped no existe");
             }
 
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+        } catch (NullPointerException | IllegalArgumentException | OperationNotSupportedException |
+                 DateTimeParseException e) {
+            System.out.print(e.getMessage());
         }
     }
 
     private static void mostrarReservas() {
+        Reserva[] reservas = controlador.getReservas();
         try {
-            if (reservas != null && reservas.getTamano() > 0) {
+            if (reservas != null && reservas.length > 0) {
                 System.out.println("Estas son las reservas existentes: ");
                 System.out.println(" ");
-                for (int i = 0; i < reservas.getTamano(); i++) {
-                    System.out.println(reservas.get()[i].toString());
+                for (int i = 0; i < reservas.length; i++) {
+                    System.out.println(reservas[i].toString());
                     System.out.println(" ");
                 }
-
             } else {
                 System.out.println("No existen reservas ");
             }
-        } catch (Exception e) {
-            System.out.print("ERROR: " + e.getMessage());
-            Entrada.cadena();
+        } catch (NullPointerException | IllegalArgumentException | DateTimeParseException e) {
+            System.out.print(e.getMessage());
         }
     }
 
@@ -339,102 +336,114 @@ public class Vista {
         boolean tipoHabitacionEncontrada = false;
         Habitacion habitacionDisponible = null;
         int numElementos = 0;
+        try {
+            Habitacion[] habitacionesTipoSolicitado = controlador.getHabitaciones(tipoHabitacion);
 
-        Habitacion[] habitacionesTipoSolicitado = habitaciones.get(tipoHabitacion);
+            if (habitacionesTipoSolicitado == null)
+                return habitacionDisponible;
 
-        if (habitacionesTipoSolicitado == null)
-            return habitacionDisponible;
+            for (int i = 0; i < habitacionesTipoSolicitado.length && !tipoHabitacionEncontrada; i++) {
 
-        for (int i = 0; i < habitacionesTipoSolicitado.length && !tipoHabitacionEncontrada; i++) {
+                if (habitacionesTipoSolicitado[i] != null) {
+                    Reserva[] reservasFuturas = controlador.getReservasFuturas(habitacionesTipoSolicitado[i]);
+                    numElementos = getNumElementosNoNulos(reservasFuturas);
 
-            if (habitacionesTipoSolicitado[i] != null) {
-                Reserva[] reservasFuturas = reservas.getReservasFuturas(habitacionesTipoSolicitado[i]);
-                numElementos = getNumElementosNoNulos(reservasFuturas);
-
-                if (numElementos == 0) {
-                    habitacionDisponible = new Habitacion(habitacionesTipoSolicitado[i]);
-                    tipoHabitacionEncontrada = true;
-                } else {
-
-                    Arrays.sort(reservasFuturas, 0, numElementos, Comparator.comparing(Reserva::getFechaFinReserva).reversed());
-
-                    if (fechaInicioReserva.isAfter(reservasFuturas[0].getFechaFinReserva())) {
+                    if (numElementos == 0) {
                         habitacionDisponible = new Habitacion(habitacionesTipoSolicitado[i]);
                         tipoHabitacionEncontrada = true;
-                    }
+                    } else {
 
-                    if (!tipoHabitacionEncontrada) {
+                        Arrays.sort(reservasFuturas, 0, numElementos, Comparator.comparing(Reserva::getFechaFinReserva).reversed());
 
-                        Arrays.sort(reservasFuturas, 0, numElementos, Comparator.comparing(Reserva::getFechaInicioReserva));
-
-                        if (fechaFinReserva.isBefore(reservasFuturas[0].getFechaInicioReserva())) {
+                        if (fechaInicioReserva.isAfter(reservasFuturas[0].getFechaFinReserva())) {
                             habitacionDisponible = new Habitacion(habitacionesTipoSolicitado[i]);
                             tipoHabitacionEncontrada = true;
                         }
-                    }
 
-                    if (!tipoHabitacionEncontrada) {
-                        for (int j = 1; j < reservasFuturas.length && !tipoHabitacionEncontrada; j++) {
-                            if (reservasFuturas[j] != null && reservasFuturas[j - 1] != null) {
-                                if (fechaInicioReserva.isAfter(reservasFuturas[j - 1].getFechaFinReserva()) &&
-                                        fechaFinReserva.isBefore(reservasFuturas[j].getFechaInicioReserva())) {
+                        if (!tipoHabitacionEncontrada) {
 
-                                    habitacionDisponible = new Habitacion(habitacionesTipoSolicitado[i]);
-                                    tipoHabitacionEncontrada = true;
+                            Arrays.sort(reservasFuturas, 0, numElementos, Comparator.comparing(Reserva::getFechaInicioReserva));
+
+                            if (fechaFinReserva.isBefore(reservasFuturas[0].getFechaInicioReserva())) {
+                                habitacionDisponible = new Habitacion(habitacionesTipoSolicitado[i]);
+                                tipoHabitacionEncontrada = true;
+                            }
+                        }
+
+                        if (!tipoHabitacionEncontrada) {
+                            for (int j = 1; j < reservasFuturas.length && !tipoHabitacionEncontrada; j++) {
+                                if (reservasFuturas[j] != null && reservasFuturas[j - 1] != null) {
+                                    if (fechaInicioReserva.isAfter(reservasFuturas[j - 1].getFechaFinReserva()) &&
+                                            fechaFinReserva.isBefore(reservasFuturas[j].getFechaInicioReserva())) {
+
+                                        habitacionDisponible = new Habitacion(habitacionesTipoSolicitado[i]);
+                                        tipoHabitacionEncontrada = true;
+                                    }
                                 }
                             }
                         }
+
+
                     }
-
-
                 }
             }
+            if (!tipoHabitacionEncontrada) {
+                System.out.println("AVISO: No hay habitaciones disponibles.");
+            }
+            if (tipoHabitacionEncontrada) {
+                System.out.println("La siguiente habitacion está disponible: " + habitacionDisponible);
+            }
+        } catch (NullPointerException | IllegalArgumentException | DateTimeParseException e) {
+            System.out.println(e.getMessage());
         }
-
         return habitacionDisponible;
     }
 
     private static void realizarCheckin() {
+        try {
+            Huesped huesped = Consola.leerHuespedPorDni();
+            huesped = controlador.buscar(huesped);
+            boolean checkinFallido = false;
 
-        Huesped huesped = Consola.leerHuespedPorDni();
-        huesped = controlador.buscar(huesped);
-        boolean checkinFallido = false;
+            Reserva[] reservasDelHuesped = controlador.getReservas(huesped);
 
-        Reserva[] reservasDelHuesped = controlador.getReservas(huesped);
+            for (int i = 0; i < reservasDelHuesped.length; i++) {
 
-        for (int i = 0; i < reservasDelHuesped.length; i++) {
-
-            if (reservasDelHuesped[i].getFechaInicioReserva().isEqual(LocalDate.now())) {
-                controlador.realizarCheckin(reservasDelHuesped[i], LocalDateTime.now());
-            } else {
-                checkinFallido = true;
+                if (reservasDelHuesped[i].getFechaInicioReserva().isEqual(LocalDate.now())) {
+                    controlador.realizarCheckin(reservasDelHuesped[i], LocalDateTime.now());
+                } else {
+                    checkinFallido = true;
+                }
             }
+            if (checkinFallido) {
+                System.out.println("AVISO: Hay al menos 1 reserva de la que no se ha podido hacer un Checkin al ser de un día distinto");
+            }
+        } catch (NullPointerException | IllegalArgumentException e) {
+            System.out.println(e.getMessage());
         }
-        if (checkinFallido) {
-            System.out.println("AVISO: Hay al menos 1 reserva de la que no se ha podido hacer un Checkin al ser de un día distinto");
-        }
-
     }
 
     private static void realizarCheckout() {
+        try {
+            Huesped huesped = Consola.leerHuespedPorDni();
+            huesped = controlador.buscar(huesped);
+            boolean checkinFallido = false;
 
-        Huesped huesped = Consola.leerHuespedPorDni();
-        huesped = controlador.buscar(huesped);
-        boolean checkinFallido = false;
+            Reserva[] reservasDelHuesped = controlador.getReservas(huesped);
 
-        Reserva[] reservasDelHuesped = controlador.getReservas(huesped);
+            for (int i = 0; i < reservasDelHuesped.length; i++) {
 
-        for (int i = 0; i < reservasDelHuesped.length; i++) {
-
-            if (reservasDelHuesped[i].getFechaFinReserva().isEqual(LocalDate.now())) {
-                controlador.realizarCheckout(reservasDelHuesped[i], LocalDateTime.now());
-            } else {
-                checkinFallido = true;
+                if (reservasDelHuesped[i].getFechaFinReserva().isEqual(LocalDate.now())) {
+                    controlador.realizarCheckout(reservasDelHuesped[i], LocalDateTime.now());
+                } else {
+                    checkinFallido = true;
+                }
             }
+            if (checkinFallido) {
+                System.out.println("AVISO: Hay al menos 1 reserva de la que no se ha podido hacer un Checkout al ser de un día distinto");
+            }
+        } catch (NullPointerException | IllegalArgumentException e){
+            System.out.println(e.getMessage());
         }
-        if (checkinFallido) {
-            System.out.println("AVISO: Hay al menos 1 reserva de la que no se ha podido hacer un Checkout al ser de un día distinto");
-        }
-
     }
 }

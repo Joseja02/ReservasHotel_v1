@@ -7,6 +7,7 @@ import org.iesalandalus.programacion.utilidades.Entrada;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import static org.iesalandalus.programacion.reservashotel.modelo.dominio.Reserva.FORMATO_FECHA_RESERVA;
 
@@ -72,8 +73,8 @@ public final class Consola {
     public static LocalDate leerFecha(String mensaje) {
         try {
             System.out.print(mensaje);
-            return LocalDate.parse(Entrada.cadena(), DateTimeFormatter.ofPattern(FORMATO_FECHA_RESERVA));
-        } catch (Exception e) {
+            return LocalDate.parse(Entrada.cadena(),DateTimeFormatter.ofPattern(FORMATO_FECHA_RESERVA));
+        } catch (DateTimeParseException e) {
             System.out.println("El formato de fecha introducido no es válido.");
             return leerFecha(mensaje);
         }
@@ -115,57 +116,56 @@ public final class Consola {
 
     public static TipoHabitacion leerTipoHabitacion() {
         for (TipoHabitacion opcion : TipoHabitacion.values()) {
-            System.out.println(opcion.ordinal() + "  -  " + opcion.toString());
+            System.out.println(opcion);
         }
         System.out.print("Escoja tipo de habitación: ");
-        return TipoHabitacion.values()[Entrada.entero()];
+        int eleccionHabitacion = Entrada.entero();
+
+        if (eleccionHabitacion < 0 || eleccionHabitacion > TipoHabitacion.values().length-1){
+            throw new IllegalArgumentException("ERROR: El tipo de habitación escogido no existe o está fuera de rango.");
+        }
+        return TipoHabitacion.values()[eleccionHabitacion];
     }
 
     public static Regimen leerRegimen() {
         for (Regimen opcion : Regimen.values()) {
-            System.out.println(opcion.ordinal() + "  -  " + opcion.toString());
+            System.out.println(opcion);
         }
         System.out.print("Escoja tipo de régimen: ");
-        return Regimen.values()[Entrada.entero()];
+        int eleccionRegimen = Entrada.entero();
+
+        if (eleccionRegimen < 0 || eleccionRegimen > Regimen.values().length-1){
+            throw new IllegalArgumentException("ERROR: El tipo de habitación escogido no existe o está fuera de rango.");
+        }
+        return Regimen.values()[eleccionRegimen];
     }
 
     public static Reserva leerReserva() {
-        Reserva reserva;
-        Huesped huesped;
-        Habitacion habitacion;
-        Regimen regimen;
-        LocalDate fechaInicioReserva;
-        LocalDate fechaFinReserva;
-        int numeroPersonas;
+        Reserva reserva = null;
+        try {
+            Huesped huesped;
+            Habitacion habitacion;
+            Regimen regimen;
+            LocalDate fechaInicioReserva;
+            LocalDate fechaFinReserva;
+            int numeroPersonas;
 
-        System.out.print("Introduzca la fecha inicio de reserva(" + FORMATO_FECHA_RESERVA + "): ");
-        fechaInicioReserva = LocalDate.parse(Entrada.cadena(), DateTimeFormatter.ofPattern(FORMATO_FECHA_RESERVA));
-        System.out.print("Introduzca la fecha fin de reserva(" + FORMATO_FECHA_RESERVA + "): ");
-        fechaFinReserva = LocalDate.parse(Entrada.cadena(), DateTimeFormatter.ofPattern(FORMATO_FECHA_RESERVA));
-        System.out.print("Introduzca número de personas: ");
-        numeroPersonas = Entrada.entero();
+            System.out.print("Introduzca la fecha inicio de reserva(" + FORMATO_FECHA_RESERVA + "): ");
+            fechaInicioReserva = LocalDate.parse(Entrada.cadena(), DateTimeFormatter.ofPattern(FORMATO_FECHA_RESERVA));
+            System.out.print("Introduzca la fecha fin de reserva(" + FORMATO_FECHA_RESERVA + "): ");
+            fechaFinReserva = LocalDate.parse(Entrada.cadena(), DateTimeFormatter.ofPattern(FORMATO_FECHA_RESERVA));
+            System.out.print("Introduzca el número de personas: ");
+            numeroPersonas = Entrada.entero();
 
-        huesped = leerHuesped();
-        habitacion = leerHabitacion();
-        regimen = leerRegimen();
+            huesped = leerHuespedPorDni();
+            habitacion = leerHabitacionPorIdentificador();
+            regimen = leerRegimen();
 
-        reserva = new Reserva(huesped, habitacion, regimen, fechaInicioReserva, fechaFinReserva, numeroPersonas);
+            reserva = new Reserva(huesped, habitacion, regimen, fechaInicioReserva, fechaFinReserva, numeroPersonas);
+            return reserva;
+        } catch (DateTimeParseException e){
+            System.out.println(e.getMessage());
+        }
         return reserva;
     }
-
-    public static LocalDateTime leerFechaHora(String mensaje) {
-        boolean comprobacionFechaErronea;
-        do {
-            try {
-                comprobacionFechaErronea = false;
-                System.out.print(mensaje);
-                return LocalDateTime.parse(Entrada.cadena(), DateTimeFormatter.ofPattern(FORMATO_FECHA_RESERVA));
-            } catch (Exception e) {
-                System.out.println("El formato de fecha introducido no es válido.");
-                comprobacionFechaErronea = true;
-            }
-        } while (comprobacionFechaErronea == true);
-        return leerFechaHora(mensaje);
-    }
-
 }

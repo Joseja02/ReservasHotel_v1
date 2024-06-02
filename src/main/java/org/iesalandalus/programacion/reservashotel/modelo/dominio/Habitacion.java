@@ -16,10 +16,15 @@ public class Habitacion {
     public static final int MAX_NUMERO_PLANTA = 3;
 
     public String getIdentificador() {
-        setIdentificador(identificador);
         return identificador;
     }
+    private void setIdentificador(){
+        this.identificador = String.valueOf(this.planta) + String.valueOf(this.puerta);
+    }
     private void setIdentificador(String identificador) {
+        if (identificador == null){
+            throw new NullPointerException("ERROR: El identificador no puede ser nulo.");
+        }
 
         identificador = String.valueOf(this.planta) + String.valueOf(this.puerta);
         this.identificador = identificador;
@@ -31,7 +36,7 @@ public class Habitacion {
 
     private void setPlanta(int planta) {
 
-        if (planta < 1 || planta > 3){
+        if (planta < MIN_NUMERO_PLANTA || planta > MAX_NUMERO_PLANTA){
             throw new IllegalArgumentException("ERROR: No se puede establecer como planta de una habitación un valor menor que 1 ni mayor que 3.");
         }
         this.planta = planta;
@@ -77,12 +82,15 @@ public class Habitacion {
         setPlanta(planta);
         setPuerta(puerta);
         setPrecio(precio);
+        setIdentificador();
+        tipoHabitacion = TipoHabitacion.SIMPLE;
     }
 
     public Habitacion (int planta, int puerta, double precio, TipoHabitacion tipoHabitacion){
         setPlanta(planta);
         setPuerta(puerta);
         setPrecio(precio);
+        setIdentificador();
         setTipoHabitacion(tipoHabitacion);
     }
 
